@@ -138,6 +138,7 @@
       border-radius: 4px 4px 0 0;
     }
     /* Verdes oscuros diferentes por sección */
+    .tab-btn[data-page="registrar"]    { background: #1b6b42; }
     .tab-btn[data-page="tension"]      { background: #0d2b1e; }
     .tab-btn[data-page="peso"]         { background: #14382a; }
     .tab-btn[data-page="azucar"]       { background: #1a4531; }
@@ -146,6 +147,58 @@
     .tab-btn[data-page="medicacion"]   { background: #113325; }
     .tab-btn[data-page="valores"]      { background: #0a2218; }
     .tab-btn svg { stroke: rgba(255,255,255,.85); color: rgba(255,255,255,.85); }
+
+    /* ── REGISTRAR HUB ── */
+    .reg-intro {
+      text-align: center;
+      color: var(--ink-soft);
+      font-size: 1rem;
+      font-style: italic;
+      margin-bottom: 20px;
+    }
+    .reg-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      padding: 4px 0 20px;
+    }
+    .reg-card {
+      background: #f4faf7;
+      border: 2.5px solid var(--line);
+      border-radius: 18px;
+      padding: 24px 14px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-family: 'Georgia', serif;
+      font-size: 1.1rem;
+      color: var(--spine);
+      font-weight: bold;
+      -webkit-tap-highlight-color: transparent;
+      transition: background .12s, transform .1s;
+      min-height: 110px;
+      border: none;
+    }
+    .reg-card:active { background: #d4eddf; transform: scale(.96); }
+    .reg-card svg { width: 38px; height: 38px; stroke: var(--spine2); }
+    .btn-volver-reg {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: none;
+      color: var(--ink-soft);
+      font-family: 'Georgia', serif;
+      font-size: 1.05rem;
+      cursor: pointer;
+      padding: 10px 0 18px;
+      -webkit-tap-highlight-color: transparent;
+      min-height: 44px;
+    }
+    .reg-subform { display: none; }
+    .reg-subform.visible { display: block; }
 
     /* ── TABLA DE VALORES ── */
     .ref-section {
@@ -189,10 +242,6 @@
       overflow: hidden;
       position: relative;
       background: #ffffff;
-      background-image: none;
-      /* Perspective on the parent = true 3D depth for all child pages */
-      perspective: 1200px;
-      perspective-origin: center center;
     }
 
     .page {
@@ -205,79 +254,15 @@
       opacity: 0;
       pointer-events: none;
       background: #ffffff;
-      background-image: none;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
       font-size: 1.05rem;
     }
-
     .page.active {
       opacity: 1;
       pointer-events: auto;
       z-index: 1;
     }
 
-    /* ── FLIPBOOK KEYFRAMES ─────────────────────────────────────────
-       Axis = LEFT edge of page (transform-origin: left bottom).
-       This means the bottom-right corner — farthest from the axis —
-       travels the most, giving the "corner peeling" sensation.
-       ─────────────────────────────────────────────────────────────── */
-
-    /* Forward exit: current page folds toward the spine (left) */
-    @keyframes k-exit-fwd {
-      0%   { transform: rotateY(0deg);
-             box-shadow: none; }
-      40%  { transform: rotateY(-45deg);
-             box-shadow: -12px 0 30px rgba(0,0,0,.18); }
-      100% { transform: rotateY(-90deg);
-             box-shadow: none; }
-    }
-    /* Forward enter: new page unfolds from behind the spine */
-    @keyframes k-enter-fwd {
-      0%   { transform: rotateY(-90deg); }
-      100% { transform: rotateY(0deg);   }
-    }
-
-    /* Backward exit: current page folds to the right */
-    @keyframes k-exit-bwd {
-      0%   { transform: rotateY(0deg);
-             box-shadow: none; }
-      40%  { transform: rotateY(45deg);
-             box-shadow: 12px 0 30px rgba(0,0,0,.18); }
-      100% { transform: rotateY(90deg);
-             box-shadow: none; }
-    }
-    /* Backward enter: previous page unfolds from right */
-    @keyframes k-enter-bwd {
-      0%   { transform: rotateY(90deg); }
-      100% { transform: rotateY(0deg);  }
-    }
-
-    /* ── ANIMATION CLASSES (added/removed by JS) ── */
-    .anim-exit-fwd {
-      transform-origin: left center;
-      animation: k-exit-fwd 0.38s ease-in forwards;
-      z-index: 3 !important;
-      pointer-events: none !important;
-    }
-    .anim-enter-fwd {
-      transform-origin: left center;
-      animation: k-enter-fwd 0.38s ease-out 0.36s both;
-      z-index: 2 !important;
-      pointer-events: none !important;
-    }
-    .anim-exit-bwd {
-      transform-origin: right center;
-      animation: k-exit-bwd 0.38s ease-in forwards;
-      z-index: 3 !important;
-      pointer-events: none !important;
-    }
-    .anim-enter-bwd {
-      transform-origin: right center;
-      animation: k-enter-bwd 0.38s ease-out 0.36s both;
-      z-index: 2 !important;
-      pointer-events: none !important;
-    }
+    /* Sin animación de cambio de página */
 
     /* scrollbar */
     .page::-webkit-scrollbar { width: 4px; }
@@ -697,7 +682,11 @@
 
   <!-- ── PESTAÑAS SUPERIORES ── -->
   <div id="top-tabs">
-    <button class="tab-btn active" data-page="tension" onclick="goPage('tension',this)">
+    <button class="tab-btn active" data-page="registrar" onclick="goPage('registrar',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+      <span class="tab-label">Anotar</span>
+    </button>
+    <button class="tab-btn" data-page="tension" onclick="goPage('tension',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       <span class="tab-label">Tensión</span>
     </button>
@@ -729,6 +718,150 @@
 
   <!-- ── PAGES ── -->
   <div id="pages">
+
+    <!-- REGISTRAR HUB -->
+    <div class="page active" id="page-registrar">
+
+      <!-- Pantalla de selección -->
+      <div id="reg-selector">
+        <div class="page-header"><h2>¿Qué quieres anotar?</h2></div>
+        <p class="reg-intro">Elige el tipo de medición</p>
+        <div class="reg-grid">
+          <button class="reg-card" onclick="mostrarFormReg('tension')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Tensión
+          </button>
+          <button class="reg-card" onclick="mostrarFormReg('peso')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2h12l2 6H4L6 2z"/><rect x="3" y="8" width="18" height="14" rx="2"/><path d="M12 12v4m-2-2h4"/></svg>
+            Peso
+          </button>
+          <button class="reg-card" onclick="mostrarFormReg('azucar')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            Azúcar
+          </button>
+          <button class="reg-card" onclick="mostrarFormReg('colesterol')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2C8 2 4 6 4 10c0 5 8 12 8 12s8-7 8-12c0-4-4-8-8-8z"/></svg>
+            Colesterol
+          </button>
+          <button class="reg-card" onclick="mostrarFormReg('observaciones')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Observaciones
+          </button>
+          <button class="reg-card" onclick="mostrarFormReg('medicacion')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            Medicación
+          </button>
+        </div>
+      </div>
+
+      <!-- Área de formulario -->
+      <div id="reg-form-area" style="display:none">
+        <button class="btn-volver-reg" onclick="volverSelector()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20"><polyline points="15 18 9 12 15 6"/></svg>
+          Volver
+        </button>
+        <div id="reg-titulo-form" class="page-header" style="margin-bottom:14px"><h2></h2></div>
+
+        <!-- Tensión -->
+        <div id="reg-form-tension" class="reg-subform add-form">
+          <div class="form-row" style="margin-bottom:8px">
+            <div class="fg"><label>Fecha</label><input type="date" id="rg-t-fecha"></div>
+            <div class="fg"><label>Hora</label><input type="time" id="rg-t-hora"></div>
+          </div>
+          <div class="form-row3" style="margin-bottom:8px">
+            <div class="fg"><label>Máxima (mmHg)</label><input type="number" id="rg-t-sist" min="60" max="250" placeholder="120"></div>
+            <div class="fg"><label>Mínima (mmHg)</label><input type="number" id="rg-t-diast" min="40" max="150" placeholder="80"></div>
+            <div class="fg"><label>Pulso (ppm)</label><input type="number" id="rg-t-pulso" min="30" max="200" placeholder="70"></div>
+          </div>
+          <div class="btn-add-wrap"><button class="btn-add" onclick="addRegTension()">OK</button></div>
+        </div>
+
+        <!-- Peso -->
+        <div id="reg-form-peso" class="reg-subform add-form">
+          <div class="form-row" style="margin-bottom:8px">
+            <div class="fg"><label>Fecha</label><input type="date" id="rg-pe-fecha"></div>
+            <div class="fg"><label>Hora</label><input type="time" id="rg-pe-hora"></div>
+          </div>
+          <div class="fg" style="margin-bottom:8px">
+            <label>Peso (kg)</label>
+            <input type="number" id="rg-pe-kg" placeholder="75.5" step="0.1" min="20" max="300">
+          </div>
+          <div class="btn-add-wrap"><button class="btn-add" onclick="addRegPeso()">OK</button></div>
+        </div>
+
+        <!-- Azúcar -->
+        <div id="reg-form-azucar" class="reg-subform add-form">
+          <div class="form-row" style="margin-bottom:8px">
+            <div class="fg"><label>Fecha</label><input type="date" id="rg-az-fecha"></div>
+            <div class="fg"><label>Hora</label><input type="time" id="rg-az-hora"></div>
+          </div>
+          <div class="form-row" style="margin-bottom:0">
+            <div class="fg"><label>Glucosa (mg/dL)</label><input type="number" id="rg-az-val" min="20" max="600" placeholder="95"></div>
+            <div class="fg"><label>Momento</label>
+              <select id="rg-az-momento">
+                <option value="Ayunas">En ayunas</option>
+                <option value="Postprandial">Postprandial (2h)</option>
+                <option value="Antes de comer">Antes de comer</option>
+                <option value="Aleatorio">Aleatorio</option>
+              </select>
+            </div>
+          </div>
+          <div class="btn-add-wrap"><button class="btn-add" onclick="addRegAzucar()">OK</button></div>
+        </div>
+
+        <!-- Colesterol -->
+        <div id="reg-form-colesterol" class="reg-subform add-form">
+          <div class="form-row" style="margin-bottom:8px">
+            <div class="fg"><label>Fecha</label><input type="date" id="rg-col-fecha"></div>
+            <div class="fg"><label>Centro / Lab.</label><input type="text" id="rg-col-lab" placeholder="Ej: Centro de salud"></div>
+          </div>
+          <div class="form-row4" style="margin-bottom:0">
+            <div class="fg"><label>Total (mg/dL)</label><input type="number" id="rg-col-total" min="50" max="600" placeholder="190"></div>
+            <div class="fg"><label>HDL (mg/dL)</label><input type="number" id="rg-col-hdl" min="10" max="200" placeholder="55"></div>
+            <div class="fg"><label>LDL (mg/dL)</label><input type="number" id="rg-col-ldl" min="10" max="500" placeholder="115"></div>
+            <div class="fg"><label>Triglicér. (mg/dL)</label><input type="number" id="rg-col-trig" min="30" max="1000" placeholder="150"></div>
+          </div>
+          <div class="btn-add-wrap"><button class="btn-add" onclick="addRegColesterol()">OK</button></div>
+        </div>
+
+        <!-- Observaciones -->
+        <div id="reg-form-observaciones" class="reg-subform add-form">
+          <div class="fg" style="margin-bottom:8px">
+            <label>Fecha</label>
+            <input type="date" id="rg-ob-fecha">
+          </div>
+          <div class="fg" style="margin-bottom:0">
+            <label>Observación</label>
+            <textarea id="rg-ob-texto" placeholder="Escribe aquí cualquier observación, síntoma, visita médica, cambio de medicación..."></textarea>
+          </div>
+          <div class="btn-add-wrap"><button class="btn-add" onclick="addRegObs()">OK</button></div>
+        </div>
+
+        <!-- Medicación -->
+        <div id="reg-form-medicacion" class="reg-subform add-form">
+          <div class="fg" style="margin-bottom:8px">
+            <label>Nombre del fármaco</label>
+            <input type="text" id="rg-m-nombre" placeholder="Ej: ATORVASTATINA 80 MG" autocomplete="off">
+          </div>
+          <div class="form-row" style="margin-bottom:8px">
+            <div class="fg"><label>Unidades</label><input type="text" id="rg-m-unidades" placeholder="Ej: COMPRIMIDO"></div>
+            <div class="fg"><label>Vía</label><input type="text" id="rg-m-via" placeholder="Ej: ORAL"></div>
+          </div>
+          <div class="form-row4" style="margin-bottom:8px">
+            <div class="fg"><label>☕ Desayuno</label><input type="text" id="rg-m-desayuno" placeholder="—" style="text-align:center"></div>
+            <div class="fg"><label>🍽 Comida</label><input type="text" id="rg-m-comida" placeholder="—" style="text-align:center"></div>
+            <div class="fg"><label>🌙 Cena</label><input type="text" id="rg-m-cena" placeholder="—" style="text-align:center"></div>
+            <div class="fg"><label>🛏 Acostarse</label><input type="text" id="rg-m-acostarse" placeholder="—" style="text-align:center"></div>
+          </div>
+          <div class="form-row" style="margin-bottom:0">
+            <div class="fg"><label>Fecha inicial</label><input type="date" id="rg-m-finicio"></div>
+            <div class="fg"><label>Fecha final</label><input type="text" id="rg-m-ffinal" placeholder="CRÓNICO"></div>
+          </div>
+          <div class="btn-add-wrap"><button class="btn-add" onclick="addRegMed()">OK</button></div>
+        </div>
+
+      </div>
+    </div>
 
     <!-- PESO -->
     <div class="page" id="page-peso">
@@ -830,7 +963,7 @@
     </div>
 
     <!-- TENSIÓN -->
-    <div class="page active" id="page-tension">
+    <div class="page" id="page-tension">
       <div class="page-header">
         <h2>Tensión Arterial</h2>
         <div class="page-num">Hoja 1 de 5</div>
@@ -1040,7 +1173,7 @@
     <!-- TABLA DE VALORES DE REFERENCIA -->
     <div class="page" id="page-valores">
       <div class="page-header">
-        <h2>Tabla de Valores</h2>
+        <h2>Valores de Referencia</h2>
       </div>
 
       <!-- TENSIÓN -->
@@ -1176,39 +1309,44 @@ function setData(section, arr) {
 }
 
 // ── NAVIGATION ──
-const PAGE_ORDER = ['tension','peso','azucar','colesterol','observaciones','medicacion','valores'];
-let currentPage = 'tension';
+const PAGE_ORDER = ['registrar','tension','peso','azucar','colesterol','observaciones','medicacion','valores'];
+let currentPage = 'registrar';
 let animating = false;
 
-function goPage(name, btn) {
-  if (name === currentPage || animating) return;
-  animating = true;
-
-  const oldEl  = document.getElementById('page-' + currentPage);
-  const newEl  = document.getElementById('page-' + name);
-  const fwd    = PAGE_ORDER.indexOf(name) > PAGE_ORDER.indexOf(currentPage);
-  const TOTAL  = 800; // ms — enough for both animations to finish
-
-  // Update spine tabs
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-
-  // Make new page visible so it can be seen under the peel
-  newEl.classList.add('active');
-
-  // Add animation classes
-  oldEl.classList.add(fwd ? 'anim-exit-fwd' : 'anim-exit-bwd');
-  newEl.classList.add(fwd ? 'anim-enter-fwd' : 'anim-enter-bwd');
-
-  setTimeout(() => {
-    // Remove old page
-    oldEl.classList.remove('active', 'anim-exit-fwd', 'anim-exit-bwd');
-    // Clean up new page animation class (leave .active)
-    newEl.classList.remove('anim-enter-fwd', 'anim-enter-bwd');
-    currentPage = name;
-    animating   = false;
-  }, TOTAL);
+function setActiveTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.page === name);
+  });
 }
+
+function goPage(name, btn) {
+  if (name === currentPage) return;
+  document.getElementById('page-' + currentPage).classList.remove('active');
+  document.getElementById('page-' + name).classList.add('active');
+  setActiveTab(name);
+  currentPage = name;
+}
+
+// ── SWIPE VERTICAL CON DEDO ───────────────────────────────────────────────────
+function initDrag() {
+  const area = document.getElementById('pages');
+  let y0 = null;
+
+  area.addEventListener('touchstart', e => {
+    y0 = e.touches[0].clientY;
+  }, { passive: true });
+
+  area.addEventListener('touchend', e => {
+    if (y0 === null) return;
+    const dy = e.changedTouches[0].clientY - y0;
+    y0 = null;
+    if (Math.abs(dy) < 40) return;
+    const idx = PAGE_ORDER.indexOf(currentPage);
+    if (dy < 0 && idx < PAGE_ORDER.length - 1) goPage(PAGE_ORDER[idx + 1], null);
+    if (dy > 0 && idx > 0)                     goPage(PAGE_ORDER[idx - 1], null);
+  }, { passive: true });
+}
+// ──────────────────────────────────────────────────────────────────────────────
 
 // ── TOAST ──
 function toast(msg) {
@@ -1268,6 +1406,7 @@ function initApp() {
   }
 
   renderAll();
+  initDrag();
 }  // end initApp
 
 // ── PORTADA ──
@@ -1642,6 +1781,122 @@ function esc(s) {
   if (window._iconCache) return;
   window._iconCache = { i192: dibujarIcono(192), i512: dibujarIcono(512) };
 })();
+
+// ── REGISTRAR HUB ──
+const REG_TITULOS = {
+  tension:       'Tensión Arterial',
+  peso:          'Peso',
+  azucar:        'Azúcar en Sangre',
+  colesterol:    'Colesterol',
+  observaciones: 'Observaciones',
+  medicacion:    'Medicación'
+};
+
+function mostrarFormReg(tipo) {
+  document.getElementById('reg-selector').style.display  = 'none';
+  document.getElementById('reg-form-area').style.display = 'block';
+  document.getElementById('reg-titulo-form').querySelector('h2').textContent = REG_TITULOS[tipo];
+  document.querySelectorAll('.reg-subform').forEach(el => el.classList.remove('visible'));
+  document.getElementById('reg-form-' + tipo).classList.add('visible');
+  const hoy = nowDate(), hora = nowTime();
+  if (tipo === 'tension')       { document.getElementById('rg-t-fecha').value   = hoy; document.getElementById('rg-t-hora').value   = hora; }
+  if (tipo === 'peso')          { document.getElementById('rg-pe-fecha').value  = hoy; document.getElementById('rg-pe-hora').value  = hora; }
+  if (tipo === 'azucar')        { document.getElementById('rg-az-fecha').value  = hoy; document.getElementById('rg-az-hora').value  = hora; }
+  if (tipo === 'colesterol')    { document.getElementById('rg-col-fecha').value = hoy; }
+  if (tipo === 'observaciones') { document.getElementById('rg-ob-fecha').value  = hoy; }
+  document.getElementById('page-registrar').scrollTop = 0;
+}
+
+function volverSelector() {
+  document.getElementById('reg-form-area').style.display = 'none';
+  document.getElementById('reg-selector').style.display  = 'block';
+  document.getElementById('page-registrar').scrollTop    = 0;
+}
+
+function addRegTension() {
+  const s = +document.getElementById('rg-t-sist').value;
+  const d = +document.getElementById('rg-t-diast').value;
+  if (!s || !d) { alert('Introduce sistólica y diastólica.'); return; }
+  const arr = getData('tension');
+  arr.unshift({ id: Date.now(), fecha: document.getElementById('rg-t-fecha').value, hora: document.getElementById('rg-t-hora').value, sist: s, diast: d, pulso: +document.getElementById('rg-t-pulso').value || null });
+  setData('tension', arr);
+  ['rg-t-sist','rg-t-diast','rg-t-pulso'].forEach(id => document.getElementById(id).value = '');
+  renderTension();
+  toast('✓ Tensión guardada');
+  volverSelector();
+}
+
+function addRegPeso() {
+  const kg = parseFloat(document.getElementById('rg-pe-kg').value);
+  if (!kg || kg < 20 || kg > 300) { alert('Introduce un peso válido.'); return; }
+  const arr = getData('peso');
+  arr.unshift({ id: Date.now(), fecha: document.getElementById('rg-pe-fecha').value, hora: document.getElementById('rg-pe-hora').value, kg });
+  setData('peso', arr);
+  document.getElementById('rg-pe-kg').value = '';
+  renderPeso();
+  toast('✓ Peso guardado');
+  volverSelector();
+}
+
+function addRegAzucar() {
+  const v = +document.getElementById('rg-az-val').value;
+  if (!v) { alert('Introduce el valor de glucosa.'); return; }
+  const arr = getData('azucar');
+  arr.unshift({ id: Date.now(), fecha: document.getElementById('rg-az-fecha').value, hora: document.getElementById('rg-az-hora').value, valor: v, momento: document.getElementById('rg-az-momento').value });
+  setData('azucar', arr);
+  document.getElementById('rg-az-val').value = '';
+  renderAzucar();
+  toast('✓ Glucosa guardada');
+  volverSelector();
+}
+
+function addRegColesterol() {
+  const t = +document.getElementById('rg-col-total').value;
+  if (!t) { alert('Introduce el colesterol total.'); return; }
+  const arr = getData('colesterol');
+  arr.unshift({ id: Date.now(), fecha: document.getElementById('rg-col-fecha').value, lab: document.getElementById('rg-col-lab').value.trim(), total: t, hdl: +document.getElementById('rg-col-hdl').value || null, ldl: +document.getElementById('rg-col-ldl').value || null, trig: +document.getElementById('rg-col-trig').value || null });
+  setData('colesterol', arr);
+  ['rg-col-total','rg-col-hdl','rg-col-ldl','rg-col-trig','rg-col-lab'].forEach(id => document.getElementById(id).value = '');
+  renderColesterol();
+  toast('✓ Analítica guardada');
+  volverSelector();
+}
+
+function addRegObs() {
+  const texto = document.getElementById('rg-ob-texto').value.trim();
+  if (!texto) { alert('Escribe una observación.'); return; }
+  const arr = getData('obs');
+  arr.unshift({ id: Date.now(), fecha: document.getElementById('rg-ob-fecha').value, texto });
+  setData('obs', arr);
+  document.getElementById('rg-ob-texto').value = '';
+  renderObs();
+  toast('✓ Observación guardada');
+  volverSelector();
+}
+
+function addRegMed() {
+  const nombre = document.getElementById('rg-m-nombre').value.trim();
+  if (!nombre) { alert('Escribe el nombre del fármaco.'); return; }
+  const entry = {
+    id: Date.now(), nombre,
+    unidades:  document.getElementById('rg-m-unidades').value.trim(),
+    via:       document.getElementById('rg-m-via').value.trim(),
+    desayuno:  document.getElementById('rg-m-desayuno').value.trim(),
+    comida:    document.getElementById('rg-m-comida').value.trim(),
+    cena:      document.getElementById('rg-m-cena').value.trim(),
+    acostarse: document.getElementById('rg-m-acostarse').value.trim(),
+    finicio:   document.getElementById('rg-m-finicio').value,
+    ffinal:    document.getElementById('rg-m-ffinal').value.trim() || 'CRÓNICO',
+  };
+  const arr = getData('med');
+  arr.push(entry);
+  setData('med', arr);
+  ['rg-m-nombre','rg-m-unidades','rg-m-via','rg-m-desayuno','rg-m-comida','rg-m-cena','rg-m-acostarse','rg-m-ffinal'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('rg-m-finicio').value = '';
+  renderMed();
+  toast('✓ Fármaco añadido');
+  volverSelector();
+}
 
 // ── SERVICE WORKER (PWA offline) ──
 if ('serviceWorker' in navigator) {
