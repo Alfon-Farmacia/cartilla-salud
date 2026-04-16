@@ -97,56 +97,50 @@
     }
     #btn-cambiar-usuario svg { width: 18px; height: 18px; stroke: #f5deb3; }
 
-    /* ── PESTAÑAS SUPERIORES ── */
+    /* ── ÍNDICE DE PESTAÑAS (1 fila, solo iconos, fijo) ── */
     #top-tabs {
       display: flex;
       flex-shrink: 0;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background: #1a4731;
+      padding: 6px 6px 0;
+      gap: 4px;
     }
-    #top-tabs::-webkit-scrollbar { display: none; }
     .tab-btn {
       flex: 1;
-      min-width: 56px;
-      padding: 14px 4px 10px;
+      padding: 8px 2px 9px;
       border: none;
       cursor: pointer;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 5px;
-      transition: filter .15s;
+      justify-content: center;
+      background: rgba(255,255,255,.13);
+      border-radius: 8px 8px 0 0;
+      transition: background .15s;
       position: relative;
       -webkit-tap-highlight-color: transparent;
+      min-width: 0;
     }
-    .tab-btn svg { width: 26px; height: 26px; }
-    .tab-btn .tab-label {
-      font-size: .60rem;
-      font-weight: bold;
-      letter-spacing: .04em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,.85);
+    .tab-btn svg {
+      width: 22px; height: 22px;
+      stroke: rgba(255,255,255,.80);
+      color: rgba(255,255,255,.80);
+      flex-shrink: 0;
     }
-    .tab-btn.active .tab-label { color: #fff; }
+    .tab-btn .tab-label { display: none; }
+    .tab-btn.active {
+      background: #fff;
+    }
+    .tab-btn.active svg { stroke: #1a4731; color: #1a4731; }
     .tab-btn.active::after {
       content: '';
       position: absolute;
-      bottom: 0; left: 10%; right: 10%;
-      height: 4px;
-      background: rgba(255,255,255,.95);
-      border-radius: 4px 4px 0 0;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: #1a4731;
     }
-    /* Verdes oscuros diferentes por sección */
-    .tab-btn[data-page="registrar"]    { background: #1b6b42; }
-    .tab-btn[data-page="tension"]      { background: #0d2b1e; }
-    .tab-btn[data-page="peso"]         { background: #14382a; }
-    .tab-btn[data-page="azucar"]       { background: #1a4531; }
-    .tab-btn[data-page="colesterol"]   { background: #1e5038; }
-    .tab-btn[data-page="observaciones"]{ background: #245c42; }
-    .tab-btn[data-page="medicacion"]   { background: #113325; }
-    .tab-btn[data-page="valores"]      { background: #0a2218; }
-    .tab-btn svg { stroke: rgba(255,255,255,.85); color: rgba(255,255,255,.85); }
 
     /* ── REGISTRAR HUB ── */
     .reg-intro {
