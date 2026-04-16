@@ -1157,6 +1157,15 @@
         <div class="btn-add-wrap"><button class="btn-add" onclick="addPeso()">OK</button></div>
       </div>
       <div id="lista-peso"><div class="empty">Aún no hay pesos registrados.</div></div>
+
+      <!-- Gráfica de progresión -->
+      <div id="grafica-peso-wrap" style="margin-top:14px;display:none">
+        <div class="section-label" style="margin-bottom:8px">Progresión del peso</div>
+        <canvas id="grafica-peso" style="width:100%;border-radius:12px;display:block"></canvas>
+      </div>
+      <p id="grafica-peso-msg" class="empty" style="display:none;font-size:.8rem">
+        Registra al menos 2 mediciones para ver la gráfica.
+      </p>
     </div>
 
     <!-- MEDICACIÓN -->
@@ -1932,7 +1941,16 @@ function addPeso() {
 function renderPeso() {
   const arr = getData('peso');
   const el  = document.getElementById('lista-peso');
-  if (!arr.length) { el.innerHTML = '<div class="empty">Aún no hay pesos registrados.</div>'; return; }
+  const wrap = document.getElementById('grafica-peso-wrap');
+  const msg  = document.getElementById('grafica-peso-msg');
+
+  if (!arr.length) {
+    el.innerHTML = '<div class="empty">Aún no hay pesos registrados.</div>';
+    if (wrap) wrap.style.display = 'none';
+    if (msg)  msg.style.display  = 'none';
+    return;
+  }
+
   el.innerHTML = '<div class="data-table-wrap"><table><thead><tr><th>Fecha</th><th>Hora</th><th>Peso</th><th></th></tr></thead><tbody>' +
     arr.map(r => `<tr>
       <td>${fmtDate(r.fecha)}</td>
@@ -1941,6 +1959,15 @@ function renderPeso() {
       <td><button class="del-btn" onclick="delEntry('peso',${r.id})">✕</button></td>
     </tr>`).join('') +
     '</tbody></table></div>';
+
+  if (arr.length < 2) {
+    if (wrap) wrap.style.display = 'none';
+    if (msg)  msg.style.display  = '';
+  } else {
+    if (wrap) wrap.style.display = '';
+    if (msg)  msg.style.display  = 'none';
+    requestAnimationFrame(() => dibujarGraficaPeso(arr));
+  }
 }
 
 function renderTension() {
@@ -2335,6 +2362,133 @@ async function exportPDF(section) {
 
   doc.save(titulo.replace(/ /g,'_') + '_' + nowDate() + '.pdf');
   toast('✓ PDF descargado');
+}
+
+// ── GRÁFICA PESO ──
+function dibujarGraficaPeso(arr) {
+  const canvas = document.getElementById('grafica-peso');
+  if (!canvas) return;
+
+  // Ordenar de más antiguo a más reciente
+  const datos = [...arr].sort((a, b) => a.fecha.localeCompare(b.fecha) || (a.hora||'').localeCompare(b.hora||''));
+
+  const DPR = window.devicePixelRatio || 1;
+  const W   = canvas.parentElement.clientWidth || 320;
+  const H   = 200;
+  canvas.width  = W * DPR;
+  canvas.height = H * DPR;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(DPR, DPR);
+
+  const pad = { top: 24, right: 20, bottom: 44, left: 46 };
+  const cw  = W - pad.left - pad.right;
+  const ch  = H - pad.top  - pad.bottom;
+
+  const kgs    = datos.map(d => d.kg);
+  const rawMin = Math.min(...kgs);
+  const rawMax = Math.max(...kgs);
+  const rango  = rawMax - rawMin || 2;
+  const minKg  = rawMin - rango * 0.15;
+  const maxKg  = rawMax + rango * 0.15;
+
+  const xPos = i => pad.left + (datos.length === 1 ? cw / 2 : (i / (datos.length - 1)) * cw);
+  const yPos = kg => pad.top + ch - ((kg - minKg) / (maxKg - minKg)) * ch;
+
+  // Fondo
+  ctx.fillStyle = '#f4faf7';
+  ctx.beginPath();
+  ctx.roundRect(0, 0, W, H, 12);
+  ctx.fill();
+
+  // Líneas de cuadrícula horizontales + etiquetas eje Y
+  const nGrid = 4;
+  for (let i = 0; i <= nGrid; i++) {
+    const kg = minKg + (i / nGrid) * (maxKg - minKg);
+    const y  = yPos(kg);
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(0,0,0,0.07)';
+    ctx.lineWidth = 1;
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(W - pad.right, y);
+    ctx.stroke();
+    ctx.fillStyle = '#888';
+    ctx.font = `${10 * Math.min(1, W / 320)}px sans-serif`;
+    ctx.textAlign = 'right';
+    ctx.fillText(kg.toFixed(1), pad.left - 6, y + 3.5);
+  }
+
+  // Etiquetas eje X
+  const maxLabels = Math.floor(cw / 38);
+  const step = Math.max(1, Math.ceil(datos.length / maxLabels));
+  datos.forEach((d, i) => {
+    if (i % step !== 0 && i !== datos.length - 1) return;
+    const x = xPos(i);
+    const p = d.fecha.split('-');
+    ctx.fillStyle = '#888';
+    ctx.font = `${9 * Math.min(1, W / 320)}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(p[2] + '/' + p[1], x, H - pad.bottom + 14);
+  });
+
+  // Etiqueta "Día" eje X
+  ctx.fillStyle = '#555';
+  ctx.font = `bold ${10 * Math.min(1, W / 320)}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillText('Día', W / 2, H - 4);
+
+  // Etiqueta "kg" eje Y
+  ctx.save();
+  ctx.translate(11, H / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = 'center';
+  ctx.fillText('kg', 0, 0);
+  ctx.restore();
+
+  // Área rellena bajo la línea
+  ctx.beginPath();
+  ctx.moveTo(xPos(0), yPos(datos[0].kg));
+  datos.forEach((d, i) => { if (i > 0) ctx.lineTo(xPos(i), yPos(d.kg)); });
+  ctx.lineTo(xPos(datos.length - 1), H - pad.bottom);
+  ctx.lineTo(xPos(0), H - pad.bottom);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, pad.top, 0, H - pad.bottom);
+  grad.addColorStop(0, 'rgba(26,71,49,0.20)');
+  grad.addColorStop(1, 'rgba(26,71,49,0.02)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Línea principal
+  ctx.beginPath();
+  ctx.strokeStyle = '#1a4731';
+  ctx.lineWidth   = 2.2;
+  ctx.lineJoin    = 'round';
+  ctx.lineCap     = 'round';
+  datos.forEach((d, i) => {
+    i === 0 ? ctx.moveTo(xPos(i), yPos(d.kg)) : ctx.lineTo(xPos(i), yPos(d.kg));
+  });
+  ctx.stroke();
+
+  // Puntos y valor del último
+  datos.forEach((d, i) => {
+    const x = xPos(i), y = yPos(d.kg);
+    const ultimo = i === datos.length - 1;
+    ctx.beginPath();
+    ctx.arc(x, y, ultimo ? 5.5 : 3.5, 0, Math.PI * 2);
+    ctx.fillStyle   = ultimo ? '#1a4731' : '#4caf50';
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth   = 1.5;
+    ctx.fill();
+    ctx.stroke();
+    if (ultimo) {
+      ctx.fillStyle  = '#1a4731';
+      ctx.font       = 'bold 11px sans-serif';
+      ctx.textAlign  = 'center';
+      ctx.fillText(d.kg + ' kg', x, y - 11);
+    }
+  });
 }
 
 // ── ESC HTML ──
